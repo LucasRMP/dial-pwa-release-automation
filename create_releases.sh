@@ -8,6 +8,11 @@ fi
 
 target_filename='hosts_prod.ini'
 comment_identifier="#"
+release_form_answers="
+leave
+
+
+"
 
 empty_lines=$(grep -n "^$" $target_filename | sed 's/\([0-9]*\).*/\1/' | tr '\n' ',')
 IFS=',' read -a batches <<< $empty_lines
@@ -29,11 +34,7 @@ for ((i=0;i<${#batches[@]};i++)) do
   git add $target_filename && git commit -m "chore: deploy $(($i+1))/$((${#batches[@]}))"
   git push origin master
 
-  gh release create $version_tag "$@" <<< "
-leave
-
-
-"
+  gh release create $version_tag "$@" <<< $release_form_answers
   version_tag=$(echo $version_tag | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1); $NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
 
   # Reset comments
