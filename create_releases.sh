@@ -24,10 +24,11 @@ for ((i=0;i<${#batches[@]};i++)) do
   git push origin master
 
   gh release create $version_tag "$@" <<< release_prompt_answers.txt
-  version_tag=$(echo $version_tag | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
+  version_tag=$(echo $version_tag | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1); $NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
 
   # Reset comments
   sed -i "2,$ s/^dial/# dial/g" $target_filename
 done
 
 git add $target_filename && git commit -m "chore: reset deploy hosts"
+git push origin master
