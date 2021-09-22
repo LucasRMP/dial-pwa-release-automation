@@ -1,5 +1,11 @@
 #!/bin/bash
 
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if [[ "$CURRENT_BRANCH" != "master" ]]; then
+  echo "Aborting script because you are not on the master branch."
+  exit 1
+fi
+
 target_filename='hosts_prod.ini'
 comment_identifier="#"
 
@@ -23,7 +29,11 @@ for ((i=0;i<${#batches[@]};i++)) do
   git add $target_filename && git commit -m "chore: deploy $(($i+1))/$((${#batches[@]}))"
   git push origin master
 
-  gh release create $version_tag "$@" <<< release_prompt_answers.txt
+  gh release create $version_tag "$@" <<< "
+leave
+
+
+"
   version_tag=$(echo $version_tag | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1); $NF=sprintf("%0*d", length($NF), ($NF+1)); print}')
 
   # Reset comments
